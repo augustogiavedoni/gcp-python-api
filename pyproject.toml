@@ -7,7 +7,9 @@ authors = [
     { name = "Augusto Giavedoni", email = "58192738+augustogiavedoni@users.noreply.github.com" }
 ]
 requires-python = ">=3.14"
-dependencies = []
+dependencies = [
+    "fastapi[standard]>=0.141.1",
+]
 
 [project.scripts]
 gcp-python-api = "gcp_python_api:main"
@@ -15,3 +17,6 @@ gcp-python-api = "gcp_python_api:main"
 [build-system]
 requires = ["uv_build>=0.12.19,<0.13.0"]
 build-backend = "uv_build"
+
+[tool.fastapi]
+entrypoint = "gcp_python_api.main:app"
