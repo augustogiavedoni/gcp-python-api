@@ -1,28 +1,38 @@
 # GCP Python API
 
-A small Python API built with FastAPI as part of my transition into backend, cloud, and AI engineering.
+A small FastAPI service built to explore backend and cloud engineering practices on Google Cloud.
 
-The goal of this repository is to progressively build a production-ready service and use it as a hands-on environment for learning Python, FastAPI, Google Cloud, deployment, observability, and related backend concepts.
+The project evolves incrementally, introducing containerization, deployment, testing, CI/CD, observability, infrastructure as code, and other production-oriented concepts over time.
 
 ## Current Features
 
 - Health check endpoint
-- Greeting endpoint with a path parameter
-- Local development with FastAPI CLI
+- Greeting endpoint with path parameter validation
+- Local development with FastAPI
 - Dependency management with `uv`
+- Containerization with Docker
+- Container images stored in Google Artifact Registry
+- Deployment to Google Cloud Run
 
 ## Tech Stack
 
-- Python
+- Python 3.14
 - FastAPI
 - uv
+- Docker
+- Google Artifact Registry
+- Google Cloud Run
 
 ## Project Structure
 
 ```text
 gcp-python-api/
-├── pyproject.toml
+├── .dockerignore
+├── Dockerfile
+├── LICENSE
 ├── README.md
+├── pyproject.toml
+├── requirements.txt
 ├── uv.lock
 └── src/
     └── gcp_python_api/
@@ -34,8 +44,14 @@ gcp-python-api/
 
 ### Prerequisites
 
-- Python
+For local development:
+
+- Python 3.14+
 - [uv](https://docs.astral.sh/uv/)
+
+For running the container:
+
+- Docker
 
 ### Install dependencies
 
@@ -43,7 +59,7 @@ gcp-python-api/
 uv sync
 ```
 
-### Run the application
+### Run locally
 
 ```bash
 uv run fastapi dev
@@ -61,7 +77,7 @@ Interactive API documentation:
 http://127.0.0.1:8000/docs
 ```
 
-## Endpoints
+## API
 
 ### Health Check
 
@@ -97,25 +113,106 @@ Response:
 }
 ```
 
-## Roadmap
+## Dependency Management
 
-This repository will evolve incrementally as I explore production backend and cloud engineering concepts.
+`uv` is the source of truth for project dependencies.
+
+Dependencies are managed through:
+
+```text
+pyproject.toml
+    ↓
+uv.lock
+```
+
+The Docker image currently installs dependencies with `pip`, so the locked dependencies are exported to `requirements.txt` before building the image:
+
+```bash
+uv export \
+  --format requirements-txt \
+  --no-dev \
+  --no-emit-project \
+  --output-file requirements.txt
+```
+
+`requirements.txt` is therefore a generated build artifact and should be regenerated whenever `uv.lock` changes.
+
+## Docker
+
+### Build the image
+
+Cloud Run requires a Linux AMD64-compatible image:
+
+```bash
+docker build \
+  --platform linux/amd64 \
+  -t gcp-python-api .
+```
+
+### Run locally
+
+```bash
+docker run --rm \
+  -p 8080:8080 \
+  gcp-python-api
+```
+
+The containerized API will be available at:
+
+```text
+http://localhost:8080
+```
+
+You can also override the port:
+
+```bash
+docker run --rm \
+  -e PORT=9000 \
+  -p 9000:9000 \
+  gcp-python-api
+```
+
+The application listens on `0.0.0.0` and uses the `PORT` environment variable, matching the runtime expectations of Google Cloud Run.
+
+## Google Cloud
+
+The container image is stored in Google Artifact Registry and deployed to Google Cloud Run.
+
+The deployment flow is:
+
+```text
+Source code
+    ↓
+Docker image
+    ↓
+Artifact Registry
+    ↓
+Cloud Run
+    ↓
+HTTPS service
+```
+
+Each deployment to Cloud Run creates an immutable revision of the service.
+
+## Roadmap
 
 - [x] Bootstrap FastAPI application
 - [x] Add basic endpoints
+- [x] Containerize with Docker
+- [x] Publish container image to Artifact Registry
+- [x] Deploy to Google Cloud Run
 - [ ] Add automated tests
-- [ ] Containerize with Docker
-- [ ] Deploy to Google Cloud Run
+- [ ] Add CI/CD
 - [ ] Add environment-based configuration
 - [ ] Integrate Secret Manager
 - [ ] Add structured logging
 - [ ] Add monitoring and observability
-- [ ] Add CI/CD
 - [ ] Manage infrastructure as code
 - [ ] Explore additional Google Cloud services
+- [ ] Introduce AI workloads with Vertex AI
 
 ## Purpose
 
-This is intentionally a learning-oriented project.
+This repository is intentionally small.
 
-Rather than starting with a complex application, the repository will grow step by step, with each iteration introducing a new backend, cloud, or production engineering concept.
+Rather than starting with a complex application, each iteration introduces a specific backend, cloud, or production engineering concern while keeping the underlying service simple enough to make the infrastructure and architectural decisions easy to understand.
