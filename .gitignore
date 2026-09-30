@@ -8,3 +8,6 @@ wheels/
 
 # Virtual environments
 .venv
+
+# Google Cloud
+gha-creds-*.json
