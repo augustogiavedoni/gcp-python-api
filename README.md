@@ -14,6 +14,8 @@ The project evolves incrementally, introducing containerization, deployment, tes
 - Containerization with Docker
 - Container images stored in Google Artifact Registry
 - Deployment to Google Cloud Run
+- Continuous integration with GitHub Actions
+- Automated deployment to Cloud Run from `main`
 
 ## Tech Stack
 
@@ -29,6 +31,10 @@ The project evolves incrementally, introducing containerization, deployment, tes
 ```text
 gcp-python-api/
 ├── .dockerignore
+├── .github/
+│   └── workflows/
+│       ├── ci.yml
+│       └── deploy.yml
 ├── Dockerfile
 ├── LICENSE
 ├── README.md
@@ -133,6 +139,66 @@ The current test suite validates:
 
 Tests are kept separate from the application source under the `tests/` directory.
 
+## CI/CD
+
+The repository uses GitHub Actions for continuous integration and deployment.
+
+### Continuous Integration
+
+Pull requests targeting `main` run the CI workflow, which:
+
+1. Checks out the repository
+2. Installs Python and `uv`
+3. Installs project and development dependencies
+4. Runs the automated test suite
+5. Validates that the Docker image can be built
+
+This prevents changes from being merged without first validating the application.
+
+### Continuous Deployment
+
+Pushes to `main` run the deployment workflow.
+
+The deployment pipeline:
+
+```text
+Push to main
+    ↓
+Run automated tests
+    ↓
+Authenticate to Google Cloud
+    ↓
+Build Docker image
+    ↓
+Push image to Artifact Registry
+    ↓
+Deploy image to Cloud Run
+    ↓
+Create new Cloud Run revision
+```
+
+Docker images are tagged with the Git commit SHA, providing traceability between source code, container images, and Cloud Run revisions.
+
+### Google Cloud Authentication
+
+GitHub Actions authenticates to Google Cloud using Workload Identity Federation.
+
+This avoids storing long-lived Google Cloud service account keys in GitHub.
+
+The deployment and runtime identities are intentionally separated:
+
+```text
+GitHub Actions service account
+    ↓
+Deploys the service
+
+Cloud Run runtime service account
+    ↓
+Runs the application
+```
+
+The deployment identity is authorized to deploy new Cloud Run revisions and to act as the runtime service account during deployment.
+
 ## Dependency Management
 
 `uv` is the source of truth for project dependencies.
@@ -222,7 +288,7 @@ Each deployment to Cloud Run creates an immutable revision of the service.
 - [x] Containerize with Docker
 - [x] Publish container image to Artifact Registry
 - [x] Deploy to Google Cloud Run
-- [ ] Add CI/CD
+- [x] Add CI/CD
 - [ ] Add environment-based configuration
 - [ ] Integrate Secret Manager
 - [ ] Add structured logging
