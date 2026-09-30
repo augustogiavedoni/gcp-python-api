@@ -10,6 +10,7 @@ The project evolves incrementally, introducing containerization, deployment, tes
 - Greeting endpoint with path parameter validation
 - Local development with FastAPI
 - Dependency management with `uv`
+- Automated API tests with `pytest` and FastAPI `TestClient`
 - Containerization with Docker
 - Container images stored in Google Artifact Registry
 - Deployment to Google Cloud Run
@@ -34,10 +35,12 @@ gcp-python-api/
 ├── pyproject.toml
 ├── requirements.txt
 ├── uv.lock
-└── src/
-    └── gcp_python_api/
-        ├── __init__.py
-        └── main.py
+├── src/
+│   └── gcp_python_api/
+│       ├── __init__.py
+│       └── main.py
+└── tests/
+    └── test_main.py
 ```
 
 ## Getting Started
@@ -112,6 +115,23 @@ Response:
   "message": "Hello, Augusto"
 }
 ```
+
+## Testing
+
+Tests are written with `pytest` and FastAPI's `TestClient`.
+
+Run the test suite with:
+
+```bash
+uv run pytest
+```
+
+The current test suite validates:
+
+- Successful health check responses
+- Greeting endpoint responses
+
+Tests are kept separate from the application source under the `tests/` directory.
 
 ## Dependency Management
 
@@ -198,10 +218,10 @@ Each deployment to Cloud Run creates an immutable revision of the service.
 
 - [x] Bootstrap FastAPI application
 - [x] Add basic endpoints
+- [x] Add automated tests
 - [x] Containerize with Docker
 - [x] Publish container image to Artifact Registry
 - [x] Deploy to Google Cloud Run
-- [ ] Add automated tests
 - [ ] Add CI/CD
 - [ ] Add environment-based configuration
 - [ ] Integrate Secret Manager
