@@ -28,3 +28,10 @@ async def environment(
     settings: Annotated[Settings, Depends(get_settings)],
 ) -> dict[str, str]:
     return {"result": settings.app_env}
+
+
+@app.get("/api-key")
+async def api_key(
+    settings: Annotated[Settings, Depends(get_settings)],
+) -> dict[str, bool]:
+    return {"is_configured": bool(settings.demo_api_key)}
