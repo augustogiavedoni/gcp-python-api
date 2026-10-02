@@ -16,6 +16,7 @@ The project evolves incrementally, introducing containerization, deployment, tes
 - Deployment to Google Cloud Run
 - Continuous integration with GitHub Actions
 - Automated deployment to Cloud Run from `main`
+- Environment-based configuration with Pydantic Settings
 
 ## Tech Stack
 
@@ -25,6 +26,7 @@ The project evolves incrementally, introducing containerization, deployment, tes
 - Docker
 - Google Artifact Registry
 - Google Cloud Run
+- Pydantic Settings
 
 ## Project Structure
 
@@ -44,6 +46,7 @@ gcp-python-api/
 ├── src/
 │   └── gcp_python_api/
 │       ├── __init__.py
+|       ├── config.py
 │       └── main.py
 └── tests/
     └── test_main.py
@@ -138,6 +141,28 @@ The current test suite validates:
 - Greeting endpoint responses
 
 Tests are kept separate from the application source under the `tests/` directory.
+
+## Configuration
+
+Application configuration is managed with `pydantic-settings`.
+
+The application currently requires the following setting:
+
+| Variable | Description | Example |
+| --- | --- | --- |
+| `APP_ENV` | Environment in which the application is running | `development` |
+
+For local development, create a `.env` file in the project root:
+
+```env
+APP_ENV=development
+```
+
+The `.env` file is excluded from both Git and the Docker build context.
+
+In deployed environments, configuration is provided at runtime rather than being included in the container image. Cloud Run provides `APP_ENV` as an environment variable when the container starts.
+
+Environment variables take precedence over values defined in `.env`, allowing the same application and container image to be configured differently across environments.
 
 ## CI/CD
 
@@ -289,7 +314,7 @@ Each deployment to Cloud Run creates an immutable revision of the service.
 - [x] Publish container image to Artifact Registry
 - [x] Deploy to Google Cloud Run
 - [x] Add CI/CD
-- [ ] Add environment-based configuration
+- [x] Add environment-based configuration
 - [ ] Integrate Secret Manager
 - [ ] Add structured logging
 - [ ] Add monitoring and observability
