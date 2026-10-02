@@ -77,3 +77,5 @@ jobs:
           image: ${{ env.IMAGE }}
           env_vars: |
             APP_ENV=${{ env.APP_ENV }}
+          secrets: |
+            DEMO_API_KEY=DEMO_API_KEY:latest
