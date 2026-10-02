@@ -42,6 +42,7 @@ jobs:
       REGION: ${{ vars.GCP_REGION }}
       REPOSITORY: ${{ vars.GAR_REPOSITORY }}
       SERVICE: ${{ vars.CLOUD_RUN_SERVICE }}
+      APP_ENV: ${{ vars.APP_ENV }}
 
     steps:
       - name: Checkout repository
@@ -74,3 +75,5 @@ jobs:
           service: ${{ env.SERVICE }}
           region: ${{ env.REGION }}
           image: ${{ env.IMAGE }}
+          env_vars: |
+            APP_ENV=${{ env.APP_ENV }}
