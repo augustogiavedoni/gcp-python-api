@@ -17,6 +17,7 @@ The project evolves incrementally, introducing containerization, deployment, tes
 - Continuous integration with GitHub Actions
 - Automated deployment to Cloud Run from `main`
 - Environment-based configuration with Pydantic Settings
+- Demo secret configuration without exposing secret values
 
 ## Tech Stack
 
@@ -93,6 +94,8 @@ http://127.0.0.1:8000/docs
 
 ### Health Check
 
+Returns the health status of the application.
+
 ```http
 GET /health
 ```
@@ -106,6 +109,8 @@ Response:
 ```
 
 ### Greet
+
+Returns a greeting for the provided name.
 
 ```http
 GET /greet/{name}
@@ -122,6 +127,50 @@ Response:
 ```json
 {
   "message": "Hello, Augusto"
+}
+```
+
+### Environment
+
+Returns the environment in which the application is running.
+
+```http
+GET /environment
+```
+
+Example:
+
+```http
+GET /environment
+```
+
+Response:
+
+```json
+{
+  "result": "development"
+}
+```
+
+### API key configuration
+
+Checks whether the demo API key is configured without exposing its value.
+
+```http
+GET /api-key
+```
+
+Example:
+
+```http
+GET /api-key
+```
+
+Response:
+
+```json
+{
+  "is_configured": true
 }
 ```
 
@@ -146,16 +195,18 @@ Tests are kept separate from the application source under the `tests/` directory
 
 Application configuration is managed with `pydantic-settings`.
 
-The application currently requires the following setting:
+The application currently uses the following settings:
 
 | Variable | Description | Example |
 | --- | --- | --- |
 | `APP_ENV` | Environment in which the application is running | `development` |
+| `DEMO_API_KEY` | Demo secret used to validate secret configuration | `local-demo-key` |
 
 For local development, create a `.env` file in the project root:
 
 ```env
 APP_ENV=development
+DEMO_API_KEY=local-demo-key
 ```
 
 The `.env` file is excluded from both Git and the Docker build context.
@@ -163,6 +214,8 @@ The `.env` file is excluded from both Git and the Docker build context.
 In deployed environments, configuration is provided at runtime rather than being included in the container image. Cloud Run provides `APP_ENV` as an environment variable when the container starts.
 
 Environment variables take precedence over values defined in `.env`, allowing the same application and container image to be configured differently across environments.
+
+In Cloud Run, sensitive configuration such as `DEMO_API_KEY` is provided through Google Cloud Secret Manager and made available to the application at runtime.
 
 ## CI/CD
 
@@ -315,7 +368,7 @@ Each deployment to Cloud Run creates an immutable revision of the service.
 - [x] Deploy to Google Cloud Run
 - [x] Add CI/CD
 - [x] Add environment-based configuration
-- [ ] Integrate Secret Manager
+- [x] Integrate Secret Manager
 - [ ] Add structured logging
 - [ ] Add monitoring and observability
 - [ ] Manage infrastructure as code
