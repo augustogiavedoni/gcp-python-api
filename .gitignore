@@ -11,3 +11,6 @@ wheels/
 
 # Google Cloud
 gha-creds-*.json
+
+# Environment variables
+.env
