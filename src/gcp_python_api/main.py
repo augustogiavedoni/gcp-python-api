@@ -1,10 +1,15 @@
+import logging
 from functools import lru_cache
 from typing import Annotated
 
 from fastapi import Depends, FastAPI
 
 from .config import Settings
+from .logging_config import configure_logging
 
+configure_logging()
+
+logger = logging.getLogger(__name__)
 app = FastAPI()
 
 
@@ -20,6 +25,7 @@ async def health() -> dict[str, str]:
 
 @app.get("/greet/{name}")
 async def greet(name: str) -> dict[str, str]:
+    logger.info(f"Greeting {name}")
     return {"message": f"Hello, {name}!"}
 
 
