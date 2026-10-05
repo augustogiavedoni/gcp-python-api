@@ -18,6 +18,8 @@ The project evolves incrementally, introducing containerization, deployment, tes
 - Automated deployment to Cloud Run from `main`
 - Environment-based configuration with Pydantic Settings
 - Demo secret configuration without exposing secret values
+- Structured application logging using Python's standard `logging` module
+- JSON logs compatible with Google Cloud Logging
 
 ## Tech Stack
 
@@ -28,6 +30,8 @@ The project evolves incrementally, introducing containerization, deployment, tes
 - Google Artifact Registry
 - Google Cloud Run
 - Pydantic Settings
+- Python logging
+- Google Cloud Logging
 
 ## Project Structure
 
@@ -174,23 +178,6 @@ Response:
 }
 ```
 
-## Testing
-
-Tests are written with `pytest` and FastAPI's `TestClient`.
-
-Run the test suite with:
-
-```bash
-uv run pytest
-```
-
-The current test suite validates:
-
-- Successful health check responses
-- Greeting endpoint responses
-
-Tests are kept separate from the application source under the `tests/` directory.
-
 ## Configuration
 
 Application configuration is managed with `pydantic-settings`.
@@ -216,6 +203,31 @@ In deployed environments, configuration is provided at runtime rather than being
 Environment variables take precedence over values defined in `.env`, allowing the same application and container image to be configured differently across environments.
 
 In Cloud Run, sensitive configuration such as `DEMO_API_KEY` is provided through Google Cloud Secret Manager and made available to the application at runtime.
+
+## Logging
+
+The application uses Python's standard `logging` module and emits structured JSON logs to stdout.
+
+When running on Cloud Run, container output is automatically collected by Google Cloud Logging. Structured JSON entries are stored as `jsonPayload`, allowing fields such as `severity`, `message`, and other contextual attributes to be queried independently.
+
+No Google Cloud logging SDK is required for the current setup.
+
+## Testing
+
+Tests are written with `pytest` and FastAPI's `TestClient`.
+
+Run the test suite with:
+
+```bash
+uv run pytest
+```
+
+The current test suite validates:
+
+- Successful health check responses
+- Greeting endpoint responses
+
+Tests are kept separate from the application source under the `tests/` directory.
 
 ## CI/CD
 
@@ -369,7 +381,7 @@ Each deployment to Cloud Run creates an immutable revision of the service.
 - [x] Add CI/CD
 - [x] Add environment-based configuration
 - [x] Integrate Secret Manager
-- [ ] Add structured logging
+- [x] Add structured logging
 - [ ] Add monitoring and observability
 - [ ] Manage infrastructure as code
 - [ ] Explore additional Google Cloud services
