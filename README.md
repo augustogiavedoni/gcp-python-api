@@ -18,7 +18,7 @@ The project evolves incrementally, introducing containerization, deployment, tes
 - Automated deployment to Cloud Run from `main`
 - Environment-based configuration with Pydantic Settings
 - Demo secret configuration without exposing secret values
-- Structured application logging using Python's standard `logging` module
+- Structured application logging with contextual fields and Cloud Run trace correlation
 - JSON logs compatible with Google Cloud Logging
 
 ## Tech Stack
@@ -208,9 +208,55 @@ In Cloud Run, sensitive configuration such as `DEMO_API_KEY` is provided through
 
 The application uses Python's standard `logging` module and emits structured JSON logs to stdout.
 
-When running on Cloud Run, container output is automatically collected by Google Cloud Logging. Structured JSON entries are stored as `jsonPayload`, allowing fields such as `severity`, `message`, and other contextual attributes to be queried independently.
+When running on Cloud Run, container output is automatically collected by Google Cloud Logging. Structured JSON entries are stored as `jsonPayload`, allowing individual fields to be queried and filtered independently.
 
-No Google Cloud logging SDK is required for the current setup.
+Application logs include standard fields such as:
+
+- `severity`
+- `message`
+- `logger`
+
+Additional contextual fields can be attached to log entries using Python's `logging` `extra` mechanism.
+
+For example, the greeting endpoint emits contextual information such as:
+
+```json
+{
+  "severity": "INFO",
+  "message": "Greeting requested",
+  "logger": "gcp_python_api.main",
+  "endpoint": "/greet/{name}",
+  "requested_name": "Augusto"
+}
+```
+
+Using structured fields instead of embedding contextual data inside the message makes logs easier to filter and analyze in Google Cloud Logging.
+
+Cloud Run requests also include trace context through the `X-Cloud-Trace-Context` header. When available, the application propagates the trace identifier into structured logs using the `logging.googleapis.com/trace` field.
+
+This allows application container logs to be correlated with the Cloud Run request log that produced them.
+
+The logging flow is:
+
+```text
+HTTP request
+    ↓
+Cloud Run request log
+    ↓
+X-Cloud-Trace-Context
+    ↓
+FastAPI
+    ↓
+Python logging + contextual fields
+    ↓
+Structured JSON to stdout
+    ↓
+Cloud Logging
+    ↓
+Correlated request and application logs
+```
+
+No Google Cloud Logging client library or OpenTelemetry instrumentation is required for the current implementation.
 
 ## Testing
 
