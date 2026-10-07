@@ -25,7 +25,14 @@ async def health() -> dict[str, str]:
 
 @app.get("/greet/{name}")
 async def greet(name: str) -> dict[str, str]:
-    logger.info(f"Greeting {name}")
+    logger.info(
+        "Greeting requested",
+        extra={
+            "endpoint": "/greet/{name}",
+            "requested_name": name,
+        },
+    )
+
     return {"message": f"Hello, {name}!"}
 
 
