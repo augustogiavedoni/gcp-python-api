@@ -43,6 +43,7 @@ jobs:
       REPOSITORY: ${{ vars.GAR_REPOSITORY }}
       SERVICE: ${{ vars.CLOUD_RUN_SERVICE }}
       APP_ENV: ${{ vars.APP_ENV }}
+      GCP_PROJECT_ID: ${{ secrets.GCP_PROJECT_ID }}
 
     steps:
       - name: Checkout repository
@@ -77,5 +78,6 @@ jobs:
           image: ${{ env.IMAGE }}
           env_vars: |
             APP_ENV=${{ env.APP_ENV }}
+            GCP_PROJECT_ID=${{ env.PROJECT_ID }}
           secrets: |
             DEMO_API_KEY=DEMO_API_KEY:latest
