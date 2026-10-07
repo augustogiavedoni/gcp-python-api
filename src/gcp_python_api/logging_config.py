@@ -1,6 +1,8 @@
 import json
 import logging
 
+from fastapi import Request
+
 STANDARD_LOG_RECORD_FIELDS = {
     "name",
     "msg",
@@ -48,3 +50,14 @@ def configure_logging() -> None:
     root_logger = logging.getLogger()
     root_logger.handlers = [handler]
     root_logger.setLevel(logging.INFO)
+
+
+def get_trace(request: Request, project_id: str) -> str | None:
+    trace_header = request.headers.get("X-Cloud-Trace-Context")
+
+    if not trace_header:
+        return None
+
+    trace_id = trace_header.split("/")[0]
+
+    return f"projects/{project_id}/traces/{trace_id}"
