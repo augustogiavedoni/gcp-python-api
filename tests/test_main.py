@@ -7,7 +7,9 @@ client = TestClient(app)
 
 
 def get_settings_override() -> Settings:
-    return Settings(app_env="test", demo_api_key="some_api_key")
+    return Settings(
+        app_env="test", demo_api_key="some_api_key", gcp_project_id="some_project_id"
+    )
 
 
 app.dependency_overrides[get_settings] = get_settings_override
