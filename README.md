@@ -20,6 +20,8 @@ The project evolves incrementally, introducing containerization, deployment, tes
 - Demo secret configuration without exposing secret values
 - Structured application logging with contextual fields and Cloud Run trace correlation
 - JSON logs compatible with Google Cloud Logging
+- Application monitoring with Google Cloud Monitoring
+- Automated uptime checks and availability alerts
 
 ## Tech Stack
 
@@ -258,6 +260,40 @@ Correlated request and application logs
 
 No Google Cloud Logging client library or OpenTelemetry instrumentation is required for the current implementation.
 
+## Monitoring
+
+The application uses Google Cloud Monitoring to observe the health and performance of the service deployed on Cloud Run.
+
+Cloud Run automatically provides infrastructure and request metrics, including:
+
+- Request count and latency
+- CPU and memory utilization
+- Container instance count
+- Container startup latency
+
+### Uptime Monitoring
+
+An uptime check periodically verifies the availability of the application's `/health` endpoint.
+
+The check is configured with the following settings:
+
+| Setting | Value |
+| --- | --- |
+| Protocol | HTTPS |
+| Endpoint | `/health` |
+| Check frequency | 15 minutes |
+| Response timeout | 10 seconds |
+| Monitoring regions | United States |
+| Expected response | HTTP 200 |
+
+### Alerting
+
+An alerting policy monitors the uptime check results and can notify the configured notification channels when availability conditions are violated.
+
+The alert condition uses a one-minute duration to avoid triggering immediately on transient failures.
+
+Monitoring and alerting are managed through Google Cloud Monitoring.
+
 ## Testing
 
 Tests are written with `pytest` and FastAPI's `TestClient`.
@@ -428,7 +464,7 @@ Each deployment to Cloud Run creates an immutable revision of the service.
 - [x] Add environment-based configuration
 - [x] Integrate Secret Manager
 - [x] Add structured logging
-- [ ] Add monitoring and observability
+- [x] Add monitoring and observability
 - [ ] Manage infrastructure as code
 - [ ] Explore additional Google Cloud services
 - [ ] Introduce AI workloads with Vertex AI
